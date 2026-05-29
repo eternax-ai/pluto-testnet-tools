@@ -1,8 +1,8 @@
 # pluto-testnet-tools
 
-TypeScript CLI for the [Pluto testnet](https://pluto-testnet.eternax.ai): dual-sign with SPHINCS+ and SILMARILS, then call `eternax_*` JSON-RPC on the public nodes. No Rust toolchain or `eternax-core` checkout required.
+TypeScript CLI for the [Pluto testnet](https://pluto-testnet.eternax.ai): dual-sign with SPHINCS+ and SILMARILS, then call `eternax_*` JSON-RPC on the public nodes.
 
-Signing matches the [eternax-core web wallet](https://github.com/eternax-ai/eternax-core): paste a **SPHINCS+ secret key**; SILMARILS master material is derived from that key (not a separate fixed seed). Each run uses `Date.now()` as **auth nonce** unless you set `PLUTO_AUTH_NONCE` — that value is only for evaluation points / the signed payload, not the Substrate account transaction nonce.
+Signing matches the [eternax-core web wallet](https://github.com/eternax-ai/eternax-core): paste a **SPHINCS+ secret key**; SILMARILS master material is derived from that key (not a separate fixed seed). Each run uses fresh **auth nonce** unless you set `PLUTO_AUTH_NONCE` — that value is only for evaluation points / the signed payload, not the Substrate account transaction nonce.
 
 ## Quick start
 
@@ -16,7 +16,7 @@ cp .env.example .env
 # Verified balance transfer from the prefunded pot
 npm run submit:transfer
 
-# Verify on node0 + node1 without submitting
+# Verify on nodes without submitting
 PLUTO_SUBMIT=0 npm run submit:transfer
 
 # Legacy record path
@@ -37,7 +37,7 @@ npm run submit:record
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `ETERNAX_NODE0_URL` | Pluto `/rpc0` | Primary RPC |
-| `ETERNAX_NODE1_URL` | Pluto `/rpc1` | Second node (verify quorum) |
+| `ETERNAX_NODE1_URL` | Pluto `/rpc1` | Backup RPC |
 | `PLUTO_MODE` | `record` | `record` or `transfer` |
 | `PLUTO_SUBMIT` | `1` | Set `0` for verify-only |
 | `PLUTO_AUTH_NONCE` | `Date.now()` | SILMARILS transfer auth nonce (not FRAME account nonce) |
@@ -46,9 +46,9 @@ npm run submit:record
 | `PLUTO_NONCE` | `Date.now()` | Record-mode payload nonce |
 | `PLUTO_AMOUNT` | `1000` | Record-mode amount |
 | `PLUTO_RECIPIENT_HEX` | `0x42…` (32 bytes) | Record-mode recipient |
-| `PLUTO_SPHINCS_SK_HEX` | **required** | 64-byte SPHINCS+ secret (hex), same as web wallet |
+| `PLUTO_SPHINCS_SK_HEX` | **required** | 64-byte SPHINCS+ secret (hex) |
 | `PLUTO_SPHINCS_PK_HEX` | derived from SK | Optional; checked if set |
-| `PLUTO_SILMARILS_MASTER_SEED` | — | Optional; only for Rust `testnet-submit.sh` parity |
+| `PLUTO_SILMARILS_MASTER_SEED` | — | Optional; dev fixed seed |
 
 ## Prefunded account keys
 
@@ -72,7 +72,7 @@ PLUTO_MODE=transfer PLUTO_SUBMIT=0 npm run submit:transfer
 | `transfer` | Verified pot transfer (recommended; matches the web wallet) |
 | `record` | Legacy SILMARILS record admission |
 
-Both modes use FIPS 205 SLH-DSA-SHAKE-128s signatures from `@noble/post-quantum`. Pluto nodes must run a build where `eternax_verifyTestnetTx` uses the same verifier as transfer (see eternax-core `node/src/rpc/testnet.rs`).
+Both modes use FIPS 205 SLH-DSA-SHAKE-128s signatures from `@noble/post-quantum`. 
 
 ## RPC methods used
 
@@ -99,11 +99,6 @@ Both modes also call `eternax_getTestnetBlock` after submit.
 npm run build
 npx pluto-testnet   # after npm link or global install
 ```
-
-## Related repos
-
-- [eternax-core](https://github.com/eternax-ai/eternax-core) — node, runtime, Rust CLI
-- [agent-contracts](https://github.com/eternax-ai/agent-contracts) — EVM/Hardhat (different stack; not used here)
 
 ## License
 
