@@ -1,0 +1,38 @@
+{
+  "name": "@eternax/pluto-testnet-tools",
+  "version": "0.1.0",
+  "description": "CLI and libraries for Pluto testnet SILMARILS submit/verify (no Rust required)",
+  "type": "module",
+  "license": "Unlicense",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eternax-ai/pluto-testnet-tools.git"
+  },
+  "bin": {
+    "pluto-testnet": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "submit": "tsx src/cli.ts",
+    "submit:transfer": "DEMO_MODE=transfer tsx src/cli.ts",
+    "submit:record": "DEMO_MODE=record tsx src/cli.ts",
+    "verify": "DEMO_SUBMIT=0 tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.2.0",
+    "@noble/post-quantum": "^0.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
