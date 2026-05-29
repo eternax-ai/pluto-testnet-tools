@@ -8,6 +8,7 @@ import {
   verifyRecord,
   verifyTransfer,
 } from './rpc.js'
+import { recordNonce, transferAuthNonce } from './nonce.js'
 import { signRecordEnvelope, signTransferEnvelope } from './signer.js'
 
 const node0 = process.env.ETERNAX_NODE0_URL ?? 'https://pluto-testnet.eternax.ai/rpc0'
@@ -29,9 +30,8 @@ async function main(): Promise<void> {
 }
 
 async function runTransfer(config: ReturnType<typeof loadSignerConfig>): Promise<void> {
-  const authNonce = BigInt(
-    process.env.PLUTO_AUTH_NONCE ?? process.env.PLUTO_NONCE ?? '1',
-  )
+  const authNonce = transferAuthNonce()
+  console.log(`auth_nonce=${authNonce} (not FRAME account nonce; override with PLUTO_AUTH_NONCE)`)
   const destHex =
     process.env.PLUTO_DEST_HEX ?? '0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0'
   const value = BigInt(process.env.PLUTO_VALUE ?? '1000000000000000000')
@@ -75,7 +75,8 @@ async function runTransfer(config: ReturnType<typeof loadSignerConfig>): Promise
 }
 
 async function runRecord(config: ReturnType<typeof loadSignerConfig>): Promise<void> {
-  const nonce = BigInt(process.env.PLUTO_NONCE ?? '1')
+  const nonce = recordNonce()
+  console.log(`record nonce=${nonce} (override with PLUTO_NONCE)`)
   const amount = BigInt(process.env.PLUTO_AMOUNT ?? '1000')
   const recipientHex = process.env.PLUTO_RECIPIENT_HEX ?? `0x${'42'.repeat(32)}`
   const recipient = fromHex(recipientHex)

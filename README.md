@@ -2,7 +2,7 @@
 
 TypeScript CLI for the [Pluto testnet](https://pluto-testnet.eternax.ai): dual-sign with SPHINCS+ and SILMARILS, then call `eternax_*` JSON-RPC on the public nodes. No Rust toolchain or `eternax-core` checkout required.
 
-Signing matches the [eternax-core web wallet](https://github.com/eternax-ai/eternax-core): paste a **SPHINCS+ secret key**; SILMARILS master material is derived from that key (not a separate fixed seed).
+Signing matches the [eternax-core web wallet](https://github.com/eternax-ai/eternax-core): paste a **SPHINCS+ secret key**; SILMARILS master material is derived from that key (not a separate fixed seed). Each run uses `Date.now()` as **auth nonce** unless you set `PLUTO_AUTH_NONCE` — that value is only for evaluation points / the signed payload, not the Substrate account transaction nonce.
 
 ## Quick start
 
@@ -40,10 +40,10 @@ npm run submit:record
 | `ETERNAX_NODE1_URL` | Pluto `/rpc1` | Second node (verify quorum) |
 | `PLUTO_MODE` | `record` | `record` or `transfer` |
 | `PLUTO_SUBMIT` | `1` | Set `0` for verify-only |
-| `PLUTO_AUTH_NONCE` | `1` | Transfer auth nonce |
+| `PLUTO_AUTH_NONCE` | `Date.now()` | SILMARILS transfer auth nonce (not FRAME account nonce) |
 | `PLUTO_DEST_HEX` | Baltathar | 20-byte destination |
 | `PLUTO_VALUE` | `1000000000000000000` | Raw units (1 ETX @ 18 decimals) |
-| `PLUTO_NONCE` | `1` | Record-mode nonce |
+| `PLUTO_NONCE` | `Date.now()` | Record-mode payload nonce |
 | `PLUTO_AMOUNT` | `1000` | Record-mode amount |
 | `PLUTO_RECIPIENT_HEX` | `0x42…` (32 bytes) | Record-mode recipient |
 | `PLUTO_SPHINCS_SK_HEX` | **required** | 64-byte SPHINCS+ secret (hex), same as web wallet |
