@@ -2,7 +2,7 @@
 
 TypeScript CLI for the [Pluto testnet](https://pluto-testnet.eternax.ai): dual-sign with SPHINCS+ and SILMARILS, then call `eternax_*` JSON-RPC on the public nodes. No Rust toolchain or `eternax-core` checkout required.
 
-This mirrors `scripts/testnet-submit.sh` / `silmarils-testnet-cli` (`dual_sign_testnet`) from the private node repo.
+Signing matches the [eternax-core web wallet](https://github.com/eternax-ai/eternax-core): paste a **SPHINCS+ secret key**; SILMARILS master material is derived from that key (not a separate fixed seed).
 
 ## Quick start
 
@@ -10,16 +10,17 @@ This mirrors `scripts/testnet-submit.sh` / `silmarils-testnet-cli` (`dual_sign_t
 git clone https://github.com/eternax-ai/pluto-testnet-tools.git
 cd pluto-testnet-tools
 npm install
-cp .env.example .env   # optional
-
-# Legacy record path (default)
-npm run submit
+cp .env.example .env
+# edit DEMO_SPHINCS_SK_HEX if needed
 
 # Verified balance transfer from the demo pot
 npm run submit:transfer
 
 # Verify on node0 + node1 without submitting
 DEMO_SUBMIT=0 npm run submit:transfer
+
+# Legacy record path
+npm run submit:record
 ```
 
 ## Public endpoints
@@ -45,19 +46,22 @@ DEMO_SUBMIT=0 npm run submit:transfer
 | `DEMO_NONCE` | `1` | Record-mode nonce |
 | `DEMO_AMOUNT` | `1000` | Record-mode amount |
 | `DEMO_RECIPIENT_HEX` | `0x42…` (32 bytes) | Record-mode recipient |
-| `DEMO_SPHINCS_SK_HEX` | — | Optional fixed SPHINCS+ secret (64 bytes) |
-| `DEMO_SPHINCS_PK_HEX` | — | Optional matching public key (32 bytes) |
-| `DEMO_SILMARILS_MASTER_SEED` | `eternax-testnet-wallet-seed-v1` | SILMARILS HKDF seed (CLI default) |
-| `DEMO_SILMARILS_MASTER_FROM_SPHINCS` | `0` | Set `1` to match [demo-web](https://github.com/eternax-ai/eternax-core) wallet keys |
+| `DEMO_SPHINCS_SK_HEX` | **required** | 64-byte SPHINCS+ secret (hex), same as web wallet |
+| `DEMO_SPHINCS_PK_HEX` | derived from SK | Optional; checked if set |
+| `DEMO_SILMARILS_MASTER_SEED` | — | Optional; only for Rust `testnet-submit.sh` parity |
 
-## Web wallet demo keys
+## Demo private keys (prefunded pot)
 
-For browser signing, use the prefunded demo SPHINCS+ keys from `eternax-core` README and set:
+Same keys as `eternax-core` README / web wallet:
+
+| Label | Secret key (hex) |
+|-------|------------------|
+| Demo 1 | `0xece714856a1061c7b3d0da60bac2acf3ea2c5604b6863fa82bc58bd6ab91f6469c6f89df16e669a903de39d89787f42abca9cb41e4fbe70d4e388b5edc444d68` |
+| Demo 2 | `0x3b0b14d070c7ef7d0a7c30a64d0a6e616f2022d474cc340198e331f6fabb91d9378d19651a99f863a2d1e039ec478547dbc87b5664249897015295a8c2434675` |
+| Demo 3 | `0x84ef911c386be817d9d4a8c5902116ec1af2d51c2c3336659c9fb316f4844b1359647532b9eab38018e70c79d12576ce13db964f9a49d952ecf59597d2098009` |
 
 ```bash
-export DEMO_SILMARILS_MASTER_FROM_SPHINCS=1
 export DEMO_SPHINCS_SK_HEX=0xece714856a1061c7b3d0da60bac2acf3ea2c5604b6863fa82bc58bd6ab91f6469c6f89df16e669a903de39d89787f42abca9cb41e4fbe70d4e388b5edc444d68
-export DEMO_SPHINCS_PK_HEX=<derive or paste matching pk>
 DEMO_MODE=transfer DEMO_SUBMIT=0 npm run submit:transfer
 ```
 
@@ -86,7 +90,8 @@ Both modes also call `eternax_getTestnetBlock` after submit.
 | `src/silmarils.ts` | SILMARILS sign/derive (port of `crates/silmarils`) |
 | `src/signer.ts` | Build RPC envelopes |
 | `src/rpc.ts` | JSON-RPC client |
-| `src/cli.ts` | `testnet-submit.sh` equivalent |
+| `src/keys.ts` | Load SPHINCS+ SK; derive SILMARILS master (web wallet) |
+| `src/cli.ts` | Submit/verify driver |
 
 ## Build / publish
 
